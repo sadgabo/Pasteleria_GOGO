@@ -30,7 +30,7 @@ def Pedido_nuevo(past: str, numPers:int , fecha: str, extra: str, Notas: str,id:
     pasteleria = Conection()
     
     with pasteleria.cursor() as cursor: 
-        cursor.execute("INSERT INT Pedidos(Tipo_Pastel,Num_Personas,Fecha_Entrega,Extras,Notas,Id_Cliente)VALUES(%s,%s,%s,%s,%s,%s)",(past,numPers,fecha,extra,Notas,id))
+        cursor.execute("INSERT INTO Pedidos(Tipo_Pastel,Num_Personas,Fecha_Entrega,Extras,Notas,Id_Cliente)VALUES(%s,%s,%s,%s,%s,%s)",(past,numPers,fecha,extra,Notas,id))
         
     pasteleria.commit()
     pasteleria.close()

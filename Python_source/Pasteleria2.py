@@ -3,6 +3,9 @@ from tkinter.ttk import Combobox
 from tkinter.ttk import Treeview
 from tkcalendar import DateEntry
 
+#from Handlers.Pedido import Pedido_nuevo
+#from Handlers.Pedido import cliente_nuevo
+
 
 
 def main_screen():
@@ -36,13 +39,13 @@ def main_screen():
 
     Button(buton_frame,text= 'Registro de pedidos ', command=Order_Screen).grid(row=1,column=0,)
 
-    Button(buton_frame,text='Registro gastos').grid(row=1,column=2)
+    Button(buton_frame,text='Registro gastos',command=expenses_register).grid(row=1,column=2)
 
     Button(buton_frame,text='Ventas',command=sales_consult).grid(row=2,column=0)
 
     Button(buton_frame,text='Consultar pedidos',command=Consult_Orders).grid(row=2,column=2)
 
-    Button(buton_frame,text='Inventario').grid(row=3,column=0)
+    Button(buton_frame,text='Inventario',command= Inventario).grid(row=3,column=0)
     
     Button(buton_frame,text='Consultar gastos',command=expenses_consult).grid(row=3,column=2)
 
@@ -63,12 +66,16 @@ def Order_Screen():
     customer_container.grid(row=1,column=0, columnspan=10,padx=10,pady=10)
 
     Label(customer_container,text='Nombre').grid(row=1,column=0)
-    Entry(customer_container).grid(row=1, column=1)
+    Nombre_Entry = Entry(customer_container)
+    Nombre_Entry.grid(row=1, column=1)
     
 
     Label(customer_container, text='Telefono').grid(row=2,column=0)
-    Phone_Number = Entry(customer_container)
-    Phone_Number.grid(row=2,column=1)
+    Phone_Entry = Entry(customer_container)
+    Phone_Entry.grid(row=2,column=1)
+    
+    Name = Nombre_Entry.get()
+    Phone = Phone_Entry.get()
 
     #contenedor del pedido 
 
@@ -82,6 +89,7 @@ def Order_Screen():
     Cake_type.set('Vainilla')
     Cake_Options = Combobox(Order_container,textvariable= Cake_type,values=['Tres leches','Chocolate','Volteado','Red velvet','Zanahoria'])
     Cake_Options.grid(row=1, column=1,padx=10,pady=10)
+    cake = Cake_Options.get()
 
 
     Label(Order_container,text='Numero de personas').grid(row=2,column=0,padx=10,pady=10)
@@ -89,27 +97,36 @@ def Order_Screen():
     Cant_Pers.set('20')
     Cant_Options = Combobox(Order_container,textvariable= Cant_Pers,values= ['20','30','50'] )
     Cant_Options.grid(row=2,column = 1,padx=10,pady=10)
-
+    Personas = Cant_Options.get()
 
     
     Label(Order_container,text='Fecha de entrega').grid(row=3,column=0,padx=10,pady=10)
     Date_entry = DateEntry(Order_container)
-    
+    Date_entry.grid(row=3,column= 1,padx=10,pady=10)
+    date = Date_entry.get()
 
 
-    Button(Order_container,text='+').grid(row=4,column=0,padx=10,pady=10)
-    Label(Order_container,text='Bettun extra').grid(row=4,column=1,padx=10,pady=10)
+    Label(Order_container,text='Bettun extra').grid(row=4,column=0,padx=10,pady=10)
+    betun_extra = StringVar(Order_container)
+    betun_extra.set('Si')
+    betun_options = Combobox(Order_container,textvariable=betun_extra,values=['Si','No'])
+    betun_options.grid(row=4,column=1,padx=10,pady=10)
+    betun = betun_options.get()
 
 
     Label(Order_container,text='Notas').grid(row=5,column=0,padx=10,pady=10)
     Notes_entry = Entry(Order_container)
     Notes_entry.grid(row=5, column=1,padx=10,pady=10)
+    Notes = Notes_entry.get()
+
+    Button(Order_container,text='Realizar pedido',command=Send_Order(Name,Phone)).grid(row=10,padx=10,pady=10)
     
 
-
-
-    Button(Order_container,text='Realizar pedido').grid(row=10,column=1,padx=10,pady=10)
-    
+def Send_Order(name: str,phone: str):
+    #cliente_nuevo(name,phone)
+    #Pedido_nuevo(cake,pers,date,betun,notes)
+    print(f"NOMBRE: {name}")
+    print(f"TELEFONO: {phone}")
 
 
 def Consult_Orders():
@@ -213,6 +230,156 @@ def expenses_consult():
     gastos.heading("column1",text='Concepto')
     gastos.heading("column2",text='Fecha')
     gastos.heading("column3",text='Total')
+    
+    
+def Inventario():
+    window = Tk()
+    window.withdraw()
+    ws = Toplevel(window)
+    ws.title('Insumos')
+    ws.geometry('500x500')
+    ws['bg'] = '#AC99F2'
+
+
+    Inventario = LabelFrame(ws,text='Inventario')
+    Inventario.grid(row=1,column=0,padx=10,pady=10)
+    
+    my_game = Treeview(Inventario)
+    my_game.grid(row=1,column=0,padx=10,pady=10)
+    
+    my_game['columns'] = ('Material', 'Cantidad', 'Medidas', 'Costos')
+
+    my_game.column("#0", width=0,  stretch=NO)
+    my_game.column("Material",anchor=CENTER, width=80)
+    my_game.column("Cantidad",anchor=CENTER,width=80)
+    my_game.column("Medidas",anchor=CENTER,width=80)
+    my_game.column("Costos",anchor=CENTER,width=80)
+
+
+    my_game.heading("#0",text="",anchor=CENTER)
+    my_game.heading("Material",text="Insumo",anchor=CENTER)
+    my_game.heading("Cantidad",text="Cantidad",anchor=CENTER)
+    my_game.heading("Medidas",text="Medidas",anchor=CENTER)
+    my_game.heading("Costos",text="Costo",anchor=CENTER)
+
+    my_game.insert(parent='',index='end',iid=0,text='',
+    values=('Harina','44000','gramos','841'))
+
+    my_game.insert(parent='',index='end',iid=1,text='',
+    values=('Mantequilla','1000','gramos','62'))
+
+    my_game.insert(parent='',index='end',iid=2,text='',
+    values=('Azucar','10000','gramos','273'))
+
+    my_game.insert(parent='',index='end',iid=3,text='',
+    values=('Huevos','12','Piezas','40'))
+
+    my_game.insert(parent='',index='end',iid=4,text='',
+    values=('Leche','3000','mililitros','43.5'))
+
+    my_game.insert(parent='',index='end',iid=5,text='',
+    values=('Polvo para hornear','1000','gramos','20'))
+
+    my_game.insert(parent='',index='end',iid=6,text='',
+    values=('Vainilla','1000','mililitros','89'))
+
+
+    my_game.insert(parent='',index='end',iid=7,text='',
+    values=('Cocoa','2500','gramos','226'))
+
+    my_game.insert(parent='',index='end',iid=8,text='',
+    values=('Chocolate','2500','gramos','280'))
+
+
+    my_game.insert(parent='',index='end',iid=9,text='',
+    values=('Aceite','946','mililitros','55'))
+
+    my_game.insert(parent='',index='end',iid=10,text='',
+    values=('Bicarbonato','1000','gramos','12'))
+
+    my_game.insert(parent='',index='end',iid=11,text='',
+    values=('Vinagre','1000','mililitros','17'))
+
+    my_game.insert(parent='',index='end',iid=12,text='',
+    values=('Limon','20','piezas','18'))
+
+    my_game.insert(parent='',index='end',iid=13,text='',
+    values=('Agua','19000','mililitros','40'))
+
+    my_game.insert(parent='',index='end',iid=14,text='',
+    values=('Azucar Moscabado','10000','gramos','220'))
+
+    my_game.insert(parent='',index='end',iid=15,text='',
+    values=('Zanahoria','1000','gramos','10'))
+
+    my_game.insert(parent='',index='end',iid=16,text='',
+    values=('Canela en Polvo','50','gramos','15'))
+
+    my_game.insert(parent='',index='end',iid=17,text='',
+    values=('Nuez moscabado','50','gramos','30'))
+
+    my_game.insert(parent='',index='end',iid=18,text='',
+    values=('Jengibre','50','gramos','26'))
+
+    my_game.insert(parent='',index='end',iid=19,text='',
+    values=('Clavo','50','gramos','20'))
+
+    my_game.insert(parent='',index='end',iid=20,text='',
+    values=('Nuez','1000','gramos','350'))
+
+    my_game.insert(parent='',index='end',iid=21,text='',
+    values=('Queso Crema','180','gramos','38.5'))
+
+    my_game.insert(parent='',index='end',iid=22,text='',
+    values=('Azucar Glass','500','gramos','15.5'))
+
+    my_game.insert(parent='',index='end',iid=23,text='',
+    values=('Manteca vegetal','1000','gramos','82'))
+
+    my_game.insert(parent='',index='end',iid=24,text='',
+    values=('Merengue en polvo','250','gramos','139'))
+
+    my_game.insert(parent='',index='end',iid=25,text='',
+    values=('Vainilla','150','mililitros','14.5'))
+
+    my_game.insert(parent='',index='end',iid=26,text='',
+    values=('Leche en polvo','460','gramos','63'))
+
+    Button(Inventario,text='Regresar',command=main_screen).grid(row=8,column=1,padx=10,pady=10)
+        
+        
+        
+        
+def expenses_register():
+    window = Tk()
+    window.withdraw()
+    
+    
+    expenses_window = Toplevel()
+    expenses_window.title('Registro de pedidos')
+    expenses_window.geometry('600x600')
+    expenses_window.resizable(False,False)
+    
+    
+    expense_container = LabelFrame(expenses_window,text='Registro de gastos')
+    expense_container.grid(row=1,column=1,padx=10,pady=10)
+    
+    Label(expense_container,text='Concepto ').grid(row=1,column=0,padx=10,pady=10)
+    concept = Entry(expense_container)
+    concept.grid(row=1,column=1,padx=10,pady=10)
+    
+    Label(expense_container,text='Fecha de Gasto').grid(row=2,column=0,padx=10,pady=10)
+    Date_entry = DateEntry(expense_container)
+    Date_entry.grid(row=2,column= 1,padx=10,pady=10)
+    
+    Label(expense_container,text='Total comprado').grid(row=3,column=0,padx=10,pady=10)
+    total = Entry(expense_container)
+    total.grid(row=3,column=1,padx=10,pady=10)
+    
+    Button(expense_container,text='Ingresar gasto').grid(row=4,column=0,padx=10,pady=10)
+    
+    Button(expense_container,text='Regresar').grid(row=4,column=1,padx=10,pady=10)
+    
     
     
 
