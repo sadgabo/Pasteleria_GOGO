@@ -1,21 +1,31 @@
-import tkinter as tk
-from tkinter import ttk
+from tkinter import *
+from tkinter.ttk import Treeview
 
-root = tk.Tk()
+def tree():
+    
+    window = Tk()
+    window.withdraw()
+    
+    tree_screen  = Toplevel(window)
+    tree_screen.title('tabla')
+    tree_screen.geometry('800x500')
 
-# Creamos el objeto Treeview
-table = ttk.Treeview(root, columns=("column1", "column2", "column3"), show="headings")
+    
+    tree_frame = LabelFrame(tree_screen, text='tabla')
+    tree_frame.grid(row=1, column=0, padx=10, pady=10)
+    
+    tree = Treeview(tree_frame, height=10, columns=('Concepto','Fecha','Total'),show='headings')
+    tree.grid(row=1, column=0, padx=10, pady=10)
+    
+    tree.heading('Concepto', text='Concepto', anchor=CENTER)
+    tree.heading('Fecha', text='Fecha', anchor=CENTER)
+    tree.heading('Total', text='Total', anchor=CENTER)
 
-# Agregamos los encabezados de las columnas
-table.heading("column1", text="Columna 1")
-table.heading("column2", text="Columna 2")
-table.heading("column3", text="Columna 3")
+    
+    Button(tree_frame, text='Borrar').grid(row=2, column=0, sticky=W+E)
+    Button(tree_frame, text='Editar').grid(row=2, column=1, sticky=W+E)
+    
+    tree_screen.mainloop()
+    
+tree()
 
-# Agregamos los datos a la tabla
-table.insert("", tk.END, values=("Dato 1", "Dato 2", "Dato 3"))
-table.insert("", tk.END, values=("Dato 4", "Dato 5", "Dato 6"))
-
-# Empaquetamos la tabla en la ventana
-table.pack()
-
-root.mainloop()
