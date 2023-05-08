@@ -31,3 +31,33 @@ def Consultar_Clientes():
         
     pasteleria.close()
     return clientes  
+
+
+
+def Update_Cliente(id:str,name:str,phone:str):
+    pasteleria = Conection()
+    
+    with pasteleria.cursor() as cursor:
+        cursor.execute(f"UPDATE Cliente SET Nombre_Cliente = '{name}',Telefono = '{phone}' WHERE Id_Cliente = '{id}' ")
+    
+    pasteleria.commit()
+    pasteleria.close()
+    
+    
+def delete_cliente(id: str):
+    pasteleria = Conection()
+    
+    with pasteleria.cursor() as cursor:
+        cursor.execute(f"SELECT Estatus FROM Cliente WHERE Id_Cliente = '{id}' ")
+        estatus = cursor.fetchone()
+        
+        if estatus[0] == 'Activo':
+            cursor.execute(f"UPDATE Cliente SET Estatus = 'Inactivo' WHERE Id_Cliente = '{id}' ")
+        else:
+            cursor.execute(f"UPDATE Cliente SET Estatus = 'Activo' WHERE Id_Cliente = '{id}' ")
+            
+    pasteleria.commit()
+    pasteleria.close()
+    
+        
+        
