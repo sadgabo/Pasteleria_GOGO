@@ -1,6 +1,19 @@
 from Handlers import Conection
 
 
+
+def Venta_Nueva(id:str,monto:str):
+    pasteleria = Conection()
+    
+    with pasteleria.cursor() as cursor:
+        cursor.execute(f"INSERT INTO Ventas(Id_Venta,Monto)VALUES(%s,%s)",(id,monto))
+        
+    pasteleria.commit()
+    pasteleria.close()
+    
+
+
+
 def Consultar_ventas():
     pasteleria = Conection()
     

@@ -45,7 +45,7 @@ def Update_Materia(id:str,name:str,cantidad:str,type:str,costo:str):
     pasteleria.close()
     
     
-def delete_materia(id):
+def Delete_Materia(id:str):
     pasteleria = Conection()
     
     with pasteleria.cursor() as cursor:
@@ -54,4 +54,13 @@ def delete_materia(id):
     pasteleria.commit()
     pasteleria.close()
     
+    
+def Update_Stock(id:str, existencia:str):
+    pasteleria = Conection()
+    
+    with pasteleria.cursor() as cursor:
+        cursor.execute(f"UPDATE INVENTARIO SET Stock = '{existencia}' WHERE Id_Materia = '{id}'")
+    
+    pasteleria.commit()
+    pasteleria.close()
     

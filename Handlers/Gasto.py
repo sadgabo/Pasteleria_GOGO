@@ -31,9 +31,34 @@ def Consultar_Gastos():
     Gastos: list
     
     with pasteleria.cursor() as cursor:
-        cursor.execute("SELECT * FROM Cliente")
-        clientes = cursor.fetchall()
+        cursor.execute("SELECT * FROM Gastos")
+        Gastos = cursor.fetchall()
         
     pasteleria.close()
-    return clientes
+    return Gastos
 
+
+def Delete_Expense(id:str):
+    pasteleria = Conection()
+    
+    with pasteleria.cursor() as cursor:
+        cursor.execute(f"SELECT Estatus FROM Gastos WHERE Id_Gasto = '{id}'")
+        status = cursor.fetchone()
+        
+        if status[0] == 'Activo':
+            cursor.execute(f"UPDATE Gastos SET Estatus = 'Inactivo' WHERE Id_Gasto = '{id}'")
+        else:
+            cursor.execute(f"UPDATE Gastos SET Estatus = 'Activo' WHERE Id_Gasto = '{id}' ")
+    
+    pasteleria.commit()
+    pasteleria.close()
+    
+    
+def Update_Expense(conc:str,date:str,tot:str,id:str):
+    pastelertia = Conection()
+    
+    with pastelertia.cursor() as cursor: 
+        cursor.execute(f"UPDATE Gastos SET Concepto = '{conc}',Fecha_Gasto = '{date}',Tot_Comprado = '{tot}' WHERE Id_Gasto = '{id}'")
+        
+    pastelertia.commit()
+    pastelertia.close()
