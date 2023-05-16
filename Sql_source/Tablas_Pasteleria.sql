@@ -23,8 +23,11 @@ CREATE TABLE Pedidos(
 CREATE TABLE Ventas(
     Id_Venta INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     Monto FLOAT NOT NULL,
-    Id_Pedido2 INT,
+    Id_Pedido2 INT NOT NULL,
+    Pastel VARCHAR(20) NOT NULL,
+    Personas INT NOT NULL,
     Estatus ENUM('Activo','Inactivo') NOT NULL DEFAULT 'Activo',
+    Fecha_Venta VARCHAR(10) NOT NULL,
     FOREIGN KEY (Id_Pedido2) REFERENCES Pedidos(Id_Pedido)
 );
 
@@ -32,8 +35,8 @@ CREATE TABLE INVENTARIO(
     Id_Materia INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     Nom_Producto VARCHAR(15) NOT NULL,
     Stock INT NOT NULL,
-    Tipo VARCHAR(20) NOT NULL,
-    Precio FLOAT NOT NULL
+    Precio FLOAT NOT NULL,
+    Tipo VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE Gastos(
@@ -41,6 +44,7 @@ CREATE TABLE Gastos(
     Concepto VARCHAR(30) NOT NULL,
     Fecha_Gasto VARCHAR(12) NOT NULL,
     Tot_Comprado INT NOT NULL,
+    Precio FLOAT NOT NULL,
     Id_Materia INT,
     Estatus ENUM('Activo','Inactivo') NOT NULL DEFAULT 'Activo',
     FOREIGN KEY (Id_Materia) REFERENCES INVENTARIO(Id_Materia)

@@ -1,12 +1,12 @@
-from Handlers import Conection
+from Handlers.data_base import Conection
 
 
 
-def Venta_Nueva(id:str,monto:str):
+def Venta_Nueva(monto:str,pastel:str,personas:str,fecha:str,id:str):
     pasteleria = Conection()
     
     with pasteleria.cursor() as cursor:
-        cursor.execute(f"INSERT INTO Ventas(Id_Venta,Monto)VALUES(%s,%s)",(id,monto))
+        cursor.execute(f"INSERT INTO Ventas(Monto,Pastel,Personas,Fecha_Venta,Id_Pedido2)VALUES(%s,%s,%s,%s,%s)",(monto,pastel,personas,fecha,id))
         
     pasteleria.commit()
     pasteleria.close()
@@ -40,13 +40,13 @@ def Delete_Venta(id:str):
     pasteleria = Conection()
     
     with pasteleria.cursor() as cursor:
-        cursor.execute(f"SELECT Estatus FROM Ventas WHERE Id_Pedido2 = '{id}'")
+        cursor.execute(f"SELECT Estatus FROM Ventas WHERE Id_Venta = '{id}'")
         estatus = cursor.fetchone()
         
         if estatus[0] == 'Activo':
-            cursor.execute(f"UPDATE Ventas SET Estatus = 'Inactivo' WHERE Id_Pedido2 = '{id}'")
+            cursor.execute(f"UPDATE Ventas SET Estatus = 'Inactivo' WHERE Id_Venta = '{id}'")
         else:
-            cursor.execute(f"UPDATE Ventas SET Estatus = 'Activo' WHERE Id_Pedido2 = '{id}'")
+            cursor.execute(f"UPDATE Ventas SET Estatus = 'Activo' WHERE Id_Venta = '{id}'")
             
     pasteleria.commit()
     pasteleria.close()
