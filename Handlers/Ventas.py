@@ -35,6 +35,16 @@ def Consultar_Venta(id:str):
     pasteleria.close()
     return venta
 
+def Consulta_Venta_Mes(mes: str):
+    pasteleria = Conection()
+    
+    ventas = list
+    with pasteleria.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM Ventas WHERE MONTH(Fecha_Venta) = '{mes}'")
+        ventas = cursor.fetchall()
+        
+    pasteleria.close()
+    return ventas
 
 def Delete_Venta(id:str):
     pasteleria = Conection()

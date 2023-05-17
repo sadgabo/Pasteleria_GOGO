@@ -24,7 +24,6 @@ def consulta_gasto(id:str):
 
 
 
-
 def Consultar_Gastos():
     pasteleria = Conection()
     
@@ -37,6 +36,16 @@ def Consultar_Gastos():
     pasteleria.close()
     return Gastos
 
+def Consulta_Gasto_mes(mes:str):
+    pasteleria = Conection()
+    gastos : list
+    
+    with pasteleria.cursor() as cursor: 
+        cursor.execute(f"SELECT * FROM Gastos  WHERE MONTH(Fecha_Gasto) = '{mes}'")
+        gastos = cursor.fetchall()
+        
+    pasteleria.close()
+    return  gastos
 
 def Delete_Expense(id:str):
     pasteleria = Conection()

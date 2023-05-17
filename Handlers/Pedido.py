@@ -33,6 +33,16 @@ def Consultar_pedidos():
     pasteleria.close()
     return pedidos
 
+def Consulta_mes(mes:str):
+    pasteleria = Conection()
+    
+    pedidos : list 
+    with pasteleria.cursor() as cursor: 
+        cursor.execute(f"SELECT * FROM Pedidos WHERE MONTH(Fecha_Entrega) = '{mes}'")
+        pedidos = cursor.fetchall()
+        
+    pasteleria.close()
+    return pedidos
 
 def Update_Order(id: str, pastel:str,pers:str,fecha:str,extra:str,notas:str):
     pasteleria = Conection()
