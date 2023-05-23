@@ -12,8 +12,6 @@ def Venta_Nueva(monto:str,pastel:str,personas:str,fecha:str,id:str):
     pasteleria.close()
     
 
-
-
 def Consultar_ventas():
     pasteleria = Conection()
     

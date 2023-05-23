@@ -1,3 +1,8 @@
+
+USE Pasteleria
+
+
+--Tabla de los clientes el cual se usa para ligarlo a los pedidos 
 CREATE TABLE Cliente(
     Id_Cliente INT AUTO_INCREMENT PRIMARY KEY,
     Nombre_Cliente VARCHAR(35) NOT NULL ,
@@ -6,6 +11,7 @@ CREATE TABLE Cliente(
 
 );
 
+--Tabla de pedidos , la cual guarda los datos del pedido , ademas de dos estados para manejar de mejor manera otras tablas 
 CREATE TABLE Pedidos(
     Id_Pedido INT  AUTO_INCREMENT NOT NULL PRIMARY KEY,
     Tipo_Pastel VARCHAR(15) NOT NULL,
@@ -20,6 +26,7 @@ CREATE TABLE Pedidos(
 );
 
 
+--tabla de ventas en la cual se guardan los pedidos liquidados ademas del monto total
 CREATE TABLE Ventas(
     Id_Venta INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     Monto FLOAT NOT NULL,
@@ -31,6 +38,7 @@ CREATE TABLE Ventas(
     FOREIGN KEY (Id_Pedido2) REFERENCES Pedidos(Id_Pedido)
 );
 
+--tabla que guarda elinventario de materias que se tiene 
 CREATE TABLE INVENTARIO(
     Id_Materia INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     Nom_Producto VARCHAR(15) NOT NULL,
@@ -39,6 +47,8 @@ CREATE TABLE INVENTARIO(
     Tipo VARCHAR(20) NOT NULL
 );
 
+
+--tabla de gastos que aumenta las existencias segun lo comprado 
 CREATE TABLE Gastos(
     Id_Gasto INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     Concepto VARCHAR(30) NOT NULL,

@@ -4,6 +4,10 @@ from tkinter.ttk import Treeview
 import tkinter.font as tkFont
 from tkcalendar import DateEntry
 from datetime import datetime
+from tkinter import messagebox
+
+import pymysql
+
 
 from Handlers.Pedido import *
 from Handlers.Clientes import *
@@ -13,9 +17,6 @@ from Handlers.Inventario import *
 global monto 
 monto : str = ''
 
-from tkinter import *
-
-from tkinter import *
 
 def main_screen():
     # Creación de la pantalla principal
@@ -74,6 +75,7 @@ def Order_Screen():
     customer_container = LabelFrame(order_Screen, text='Datos del cliente', bg='#7F7FFF')
     customer_container.grid(row=1, column=0, columnspan=10, padx=10, pady=10)
 
+    #labels de ingreso de datos del cliente 
     Label(customer_container, text='Nombre', font=font_style).grid(row=1, column=0)
     Nombre_Entry = Entry(customer_container, font=font_style)
     Nombre_Entry.grid(row=1, column=1)
@@ -92,22 +94,26 @@ def Order_Screen():
     Cake_Options = Combobox(Order_container, textvariable=Cake_type, values=['Tres leches', 'Chocolate', 'Volteado','Red velvet', 'Zanahoria'],font=font_style)
     Cake_Options.grid(row=1, column=1, padx=10, pady=10)
 
+    #seleccionador de cantidad de personas
     Label(Order_container, text='Numero de personas', font=font_style).grid(row=2, column=0, padx=10, pady=10)
     Cant_Pers = StringVar(Order_container)
     Cant_Pers.set('20')
     Cant_Options = Combobox(Order_container, textvariable=Cant_Pers, values=['20', '30', '50'], font=font_style)
     Cant_Options.grid(row=2, column=1, padx=10, pady=10)
 
+    #calendario para ingresar la fecha que se desea entregar 
     Label(Order_container, text='Fecha de entrega', font=font_style).grid(row=3, column=0, padx=10, pady=10)
     Date_entry = DateEntry(Order_container, date_pattern='yyyy/mm/dd', font=font_style)
     Date_entry.grid(row=3, column=1, padx=10, pady=10)
 
+    #seleccionador para betun extra 
     Label(Order_container, text='Bettun extra', font=font_style).grid(row=4, column=0, padx=10, pady=10)
     betun_extra = StringVar(Order_container)
     betun_extra.set('Si')
     betun_options = Combobox(Order_container, textvariable=betun_extra, values=['Si', 'No'], font=font_style)
     betun_options.grid(row=4, column=1, padx=10, pady=10)
 
+    #pequeña caja para notas extras
     Label(Order_container, text='Notas', font=font_style).grid(row=5, column=0, padx=10, pady=10)
     Notes_entry = Entry(Order_container, font=font_style)
     Notes_entry.grid(row=5, column=1, padx=10, pady=10)
@@ -119,6 +125,7 @@ def Order_Screen():
     
 
 def Send_Order():
+    #funcion que filtra los datos y los envia a la base de datos 
     global delete
     name = Nombre_Entry.get()
     Phone = Phone_Entry.get()
@@ -127,17 +134,35 @@ def Send_Order():
     fecha = Date_entry.get()
     betun = betun_options.get()
     notas = Notes_entry.get()
-      
-    print(name,Phone,pastel,personas,fecha,betun,notas)
+    
+    #pequeño muestreo de datos 
+    print(name, Phone, pastel, personas, fecha, betun, notas)
+    
+    #revisa si ya existe el cliente mediante el numero de telefono , si no existe crea un nuevo cliene en la tabla cliente
     existe = consulta_cliente(Phone)
     if not existe:
-        cliente_nuevo(name,Phone)
-             
-    longitud = len(Phone)
-    if name != '' and longitud ==12 and pastel != '' and personas != '' and fecha != '' and betun != '' and notas != '':
-        existe = consulta_cliente(Phone)
-        Pedido_nuevo(pastel,personas,fecha,betun,notas,existe[0]) 
-    
+        cliente_nuevo(name, Phone)
+
+    # validacion de datos no vacios y de longitud correcta,
+    try:
+        longitud = len(Phone)
+        if name != '' and longitud == 12 and pastel != '' and personas != '' and fecha != '' and betun != '' and notas != '':
+            existe = consulta_cliente(Phone)
+            Pedido_nuevo(pastel, personas, fecha, betun, notas, existe[0])
+    except pymysql.err.OperationalError as error:
+        #excepcion que se lanza si se activa el trigger
+        if error.args[0] == 1644:
+            show_warning_message('Error', 'La fecha de entrega debe tener una diferencia de una semana con respecto al día actual')
+        else:
+            show_warning_message('Error', 'Error al enviar el pedido a la base de datos')
+        
+        
+def show_warning_message(title, message):
+    #pantalla de aviso que se lanza si se activo el triger
+    window = Tk()
+    window.withdraw()
+    messagebox.showwarning(title, message)    
+            
 def Consult_Orders():
     global months_options, orders, months_options
     window = Tk()
@@ -155,7 +180,7 @@ def Consult_Orders():
     Consult = LabelFrame(Consult_Screen, text='Pedidos pendientes', bg='#9797FF')
     Consult.grid(row=1, column=0)
 
-    Label(Consult, text='Mes', font=font_style).grid(row=1, column=0, padx=10, pady=10)
+    Label(Consult, text='Mes', font=font_style,bg='#9797FF').grid(row=1, column=0, padx=10, pady=10)
     months = StringVar(Consult)
     months.set('Enero')
     months_options = Combobox(Consult, textvariable=months, values=['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'], font=font_style)
@@ -168,6 +193,7 @@ def Consult_Orders():
     orders_frame = LabelFrame(Consult_Screen, text='Pedidos', bg='#9797FF')
     orders_frame.grid(row=2, column=0, padx=10, pady=10)
 
+    #tabla para mostrar los distintos pediso +
     orders = Treeview(orders_frame, columns=("Column1", "Column2", "Column3", "Column4", "Column5"), show="headings")
     orders.grid(row=2, column=0, columnspan=3)
 
@@ -237,9 +263,10 @@ def update_Order_screen():
     order_Screen.title("Editar pedidos")
     order_Screen.geometry("400x400")
     order_Screen.resizable(False,False)
-
-    global Upd_Cake_Options,Upd_Cant_Options,Upd_Date_entry,Upd_betun_options,Upd_Notes_entry,elemento
+    order_Screen.configure(bg='#9797FF')
     
+    global Upd_Cake_Options,Upd_Cant_Options,Upd_Date_entry,Upd_betun_options,Upd_Notes_entry,elemento
+    button_style = {'background': '#87CEFA', 'foreground': 'black', 'font': ('Arial', 12)}
     
     elemento = orders.item(orders.selection())['values'][0]
     
@@ -275,7 +302,7 @@ def update_Order_screen():
     Upd_Notes_entry = Entry(Order_container)
     Upd_Notes_entry.grid(row=5, column=1,padx=10,pady=10)
 
-    Button(Order_container,text='Actualizar',command=Update_order_Function).grid(row=10,columnspan=3,sticky= W + E)
+    Button(Order_container,text='Actualizar',command=Update_order_Function,**button_style).grid(row=10,columnspan=3,sticky= W + E)
     
           
 def Update_order_Function():
@@ -386,37 +413,42 @@ def Liquidar_orden():
 def sales_consult(): #Pagina  para consultar las ventas por mes 
     window = Tk()
     window.withdraw()
-    global tablaVentas,months_options3
+
+    global tablaVentas, months_options3
+
     sales_screen = Toplevel(window)
     sales_screen.title("VENTAS")
     sales_screen.geometry("1100x600")
-    sales_screen.resizable(False,False)
+    sales_screen.resizable(False, False)
+    sales_screen.configure(bg='#9797FF')
+
+    button_style = {'background': '#87CEFA', 'foreground': 'black', 'font': ('Arial', 12)}
     
-    contenedorVenta = LabelFrame(sales_screen,text="Consulta")
-    contenedorVenta.grid(row=1,column=0)
-    
-    Label(contenedorVenta,text='Mes').grid(row=1,column=0,padx=10,pady=10)
+    contenedorVenta = LabelFrame(sales_screen, text="Consulta", bg='#9797FF')
+    contenedorVenta.grid(row=1, column=0)
+
+    Label(contenedorVenta, text='Mes', bg='#9797FF').grid(row=1, column=0, padx=10, pady=10)
     months = StringVar(contenedorVenta)
     months.set('Enero')
-    months_options3 = Combobox(contenedorVenta,textvariable=months,values=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'])
-    months_options3.grid(row=1,column=1,padx=10,pady=10)
+    months_options3 = Combobox(contenedorVenta, textvariable=months, values=['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'])
+    months_options3.grid(row=1, column=1, padx=10, pady=10)
 
-    Button(contenedorVenta,text='Buscar',command=sales_consult_function).grid(row=1,column=2,padx=10,pady=10)
+    Button(contenedorVenta, text='Buscar', command=sales_consult_function,**button_style).grid(row=1, column=2, padx=10, pady=10)
 
-    Ventas = LabelFrame(sales_screen,text="Ventas")
-    Ventas.grid(row=2,column=0,padx=10,pady=10)
-    
-    tablaVentas = Treeview(Ventas,columns=("column1","column2","column3","column4","column5"),show="headings")
-    tablaVentas.grid(row=2,column=0,columnspan=3)
-    
-    tablaVentas.heading("column1",text='Id Venta',anchor=CENTER)
-    tablaVentas.heading("column2",text='Monto',anchor=CENTER)
-    tablaVentas.heading("column3",text='Pastel', anchor=CENTER)
-    tablaVentas.heading("column4",text='Numero de personas',anchor=CENTER)
-    tablaVentas.heading("column5",text='Fecha de venta',anchor=CENTER)
-    
-    Button(Ventas,text='Borrar',command=Delete_sales).grid(row=3,column=0,sticky= W + E)
-    
+    Ventas = LabelFrame(sales_screen, text="Ventas", bg='#9797FF')
+    Ventas.grid(row=2, column=0, padx=10, pady=10)
+
+    tablaVentas = Treeview(Ventas, columns=("column1", "column2", "column3", "column4", "column5"), show="headings")
+    tablaVentas.grid(row=2, column=0, columnspan=3)
+
+    tablaVentas.heading("column1", text='Id Venta', anchor='center')
+    tablaVentas.heading("column2", text='Monto', anchor='center')
+    tablaVentas.heading("column3", text='Pastel', anchor='center')
+    tablaVentas.heading("column4", text='Numero de personas', anchor='center')
+    tablaVentas.heading("column5", text='Fecha de venta', anchor='center')
+
+    Button(Ventas, text='Borrar', command=Delete_sales, **button_style).grid(row=3, columnspan=3, sticky= W + E)
+
                        
 def sales_consult_function():
     
@@ -463,38 +495,42 @@ def expenses_consult():
     global gastos_Tabla, months_options2
     sales_screen = Toplevel(window)
     sales_screen.title("Gastos")
-    sales_screen.geometry("900x600")
+    sales_screen.geometry("1100x600")
     sales_screen.resizable(False,False)
+    sales_screen.configure(bg='#9797FF')
     
-    contenedorGasto = LabelFrame(sales_screen,text="Consulta")
+    button_style = {'background': '#87CEFA', 'foreground': 'black', 'font': ('Arial', 12)}
+    
+    contenedorGasto = LabelFrame(sales_screen,text="Consulta",bg='#9797FF')
     contenedorGasto.grid(row=1,column=0)
     
-    Label(contenedorGasto,text='Mes').grid(row=1,column=0,padx=10,pady=10)
+    Label(contenedorGasto,text='Mes',bg='#9797FF').grid(row=1,column=0,padx=10,pady=10)
     months = StringVar(contenedorGasto)
     months.set('Enero')
     months_options2 = Combobox(contenedorGasto,textvariable=months,values=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'])
     months_options2.grid(row=1,column=1,padx=10,pady=10)
 
     
-    Button(contenedorGasto,text='Buscar',command=Consult_expense_function).grid(row=1,column=2,padx=10,pady=10)
+    Button(contenedorGasto,text='Buscar',command=Consult_expense_function,**button_style).grid(row=1,column=2,padx=10,pady=10)
 
     tabla = LabelFrame(sales_screen,text='Gastos')
     tabla.grid(row=2,column=0,padx=10,pady=10)
     
     #concepto, fecha , total  
-    gastos_Tabla =  Treeview(tabla,height=10,columns=('Id Gasto','Concepto','Fecha','Total'),show='headings')
+    gastos_Tabla =  Treeview(tabla,height=10,columns=('Id Gasto','Concepto','Fecha','Total','Precio'),show='headings')
     gastos_Tabla.grid(row=2,column=0,columnspan=3)
     
     gastos_Tabla.heading('Id Gasto',text='Id Gasto',anchor=CENTER)
     gastos_Tabla.heading('Concepto',text='Concepto',anchor=CENTER)
     gastos_Tabla.heading('Fecha',text='Fecha',anchor=CENTER)
     gastos_Tabla.heading('Total',text='Total',anchor=CENTER)
+    gastos_Tabla.heading('Precio',text='Precio',anchor=CENTER)
     
     
     
-    Button(tabla,text='Borrar',command=delete_expense).grid(row=3,column=0,sticky= W + E)
+    Button(tabla,text='Borrar',command=delete_expense,**button_style).grid(row=3,columnspan = 3,sticky= W + E)
     
-    Button(tabla,text='Editar',command=update_expense_scree).grid(row=3,column=1,sticky= W + E)
+    Button(tabla,text='Editar',command=update_expense_scree,**button_style).grid(row=4,columnspan = 3,sticky= W + E)
      
 def Inventario():
     
@@ -507,7 +543,9 @@ def Inventario():
     Inventario_Screen['bg'] = '#AC99F2'
 
     global tabla_insumos
-
+    
+    button_style = {'background': '#87CEFA', 'foreground': 'black', 'font': ('Arial', 12)}
+    
     Inventario_container = LabelFrame(Inventario_Screen,text='Inventario')
     Inventario_container.grid(row=1,column=0,padx=10,pady=10)
     
@@ -534,8 +572,8 @@ def Inventario():
     for productos in materias_existentes:
         tabla_insumos.insert('',0, values=(productos[1],productos[2],productos[4],productos[3]))
         
-    Button(Inventario_container,text='Editar').grid(row=2,column=0,sticky=W + E)
-    Button(Inventario_container,text='Eliminar',command=(delete_materia)).grid(row=2,column=1,sticky= W + E)
+    Button(Inventario_container,text='Editar',**button_style).grid(row=2,column=0,sticky=W + E)
+    Button(Inventario_container,text='Eliminar',command=delete_materia,**button_style).grid(row=3,column=0,sticky= W + E)
    
 def delete_materia():
     try:
@@ -550,13 +588,15 @@ def expenses_register():
     window = Tk()
     window.withdraw()
     
-    global concept_Entrty,Date_entry,total_Entry
+    global concept_Entrty,Date_entry,total_Entry,price_entry
     
     expenses_window = Toplevel()
     expenses_window.title('Registro de pedidos')
-    expenses_window.geometry('600x600')
+    expenses_window.geometry('300x300')
     expenses_window.resizable(False,False)
+    expenses_window.configure(bg='#AC99F2')
     
+    button_style = {'background': '#87CEFA', 'foreground': 'black', 'font': ('Arial', 12)}
     
     expense_container = LabelFrame(expenses_window,text='Registro de gastos')
     expense_container.grid(row=1,column=1,padx=10,pady=10)
@@ -573,14 +613,20 @@ def expenses_register():
     total_Entry = Entry(expense_container)
     total_Entry.grid(row=3,column=1,padx=10,pady=10)
     
+    Label(expense_container,text='Precio').grid(row=4,column=0,padx=10,pady=10)
+    price_entry = Entry(expense_container)
+    price_entry.grid(row=4,column=1,padx=10,pady=10)
     
-    Button(expense_container,text='Ingresar gasto',command=send_expense).grid(row=4,column=0,padx=10,pady=10)
+    
+    Button(expense_container, text='Ingresar gasto', command=send_expense, **button_style).grid(row=5, column=0, padx=10, pady=10)
+
     
     
 def send_expense():
     concepto = concept_Entrty.get()
     fecha = Date_entry.get()
     total = total_Entry.get()
+    precio = price_entry.get()
     materias = Consultar_Materias()
     concepto_format = concepto.capitalize()[0] + concepto.lower()[1:]
     
@@ -597,16 +643,13 @@ def send_expense():
     #pequeña validacion para saber si los datos no estan vacios 
     if concepto != '' and fecha != '' and total != '':
         Update_Stock(id_mat, nuevo_stock)
-        Gasto_Nuevo(concepto_format,fecha,total,id_mat)
+        Gasto_Nuevo(concepto_format,fecha,total,precio,id_mat)
     
 def Consult_expense_function():
     
     expenses = gastos_Tabla.get_children()
     for elementos in expenses:
         gastos_Tabla.delete(elementos)
-    
-    gastos  : list
-    gastos = Consultar_Gastos()
     
     if months_options2.get() == 'Enero':
         num_mes = '01'
@@ -637,7 +680,8 @@ def Consult_expense_function():
 
     for columna in Gasto_Mes:
         if columna[5] == 'Activo':
-            gastos_Tabla.insert('',0,values=(columna[0],columna[1],columna[2],columna[3]))
+            print(columna[0],columna[1],columna[2],columna[3],columna[4])
+            #gastos_Tabla.insert('',0,values=(columna[0],columna[1],columna[2],columna[3],columna[4]))
         
 def delete_expense():
     try:
